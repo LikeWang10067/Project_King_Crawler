@@ -1,47 +1,57 @@
 import requests
 from bs4 import BeautifulSoup
+import re
 
 url = "https://issues.apache.org/jira/browse/CAMEL-10597"
 response = requests.get(url)
 soup = BeautifulSoup(response.text, 'html.parser')
 
-# extract data test
-title = soup.find("h1").text
-print("Ticket Title: " + title)
-
 ticket_info = {}
 
-def extract_details_text(soup, label):
-    element = soup.find("strong", title=label)
+def extract_text(soup, label, title=None, id=None):
+    element = soup.find(label, title=title, id=id)
     if element:
         next_element = element.find_next_sibling()
         if next_element:
-            if "/s" in label:
-                split_list = next_element.text.strip().split(", ")
-                return [item.strip() for item in split_list]
-            return next_element.text.strip()
+            if title is None or '/s' not in title:
+                raw_text = next_element.text
+                cleaned_text = " ".join(raw_text.replace("\n", " ").split())
+                return cleaned_text
+            split_list = next_element.text.strip().split(", ")
+            return [item.strip() for item in split_list]
     return None
 
 # extract all the Details
-type_ = extract_details_text(soup, "Type")
-ticket_info["Type"] = type_
-status = extract_details_text(soup, "Status")
-ticket_info["Status"] = status
-priority = extract_details_text(soup, "Priority")
-ticket_info["Priority"] = priority
-resolution = extract_details_text(soup, "Resolution")
-ticket_info["Resolution"] = resolution
-affects_version = extract_details_text(soup, "Affects Version/s")
-ticket_info["Affects Version/s"] = affects_version
-fix_version = extract_details_text(soup, "Fix Version/s")
-ticket_info["Fix Version/s"] = fix_version
-component = extract_details_text(soup, "Component/s")
-ticket_info["Component/s"] = component
-labels = extract_details_text(soup, "Labels")
-ticket_info["Labels"] = labels
-patch_info = extract_details_text(soup, "Patch Info")
-ticket_info["Patch Info"] = patch_info
-estimated_complexity = extract_details_text(soup, "Estimated Complexity")
-ticket_info["Estimated Complexity"] = estimated_complexity
+details_list = ["Type", "Status", "Priority", "Resolution", "Affects Version/s", "Fix Version/s", "Component/s", "Labels", "Patch Info", "Estimated Complexity"]
+for detail in details_list:
+    ticket_info[detail] = extract_text(soup, "strong", detail)
+
+# extract all the People
+people_list = ["Assignee", "Reporter", "Votes", "Watchers"]
+for people in people_list:
+    ticket_info[people] = extract_text(soup, "dt", people)
+
+# extract all the Dates
+dates_list = ["Created", "Updated", "Resolved"]
+for date in dates_list:
+    ticket_info[date] = extract_text(soup, "dt")
+
+# extract the Description
+description = extract_text(soup, "div", None, "descriptionmodule_heading")
+ticket_info["Description"] = description
+
+# extract the Comments
+# comments = {}
+# pattern = re.compile(r"comment-\d{8}")
+# ind = "comment-15748543"
+# comments = soup.find_all("div", id=ind)
+# comments = soup.find_all("div", class_="activity-comment")
+# print(comments)
+
+# comments_list = soup.find_all(id=ind)
+# for comment in comments_list:
+#     comments[comment.find("a", class_="user-hover").text] = comment.find("div", class_="action-body").text
+# print("Comments: " + str(comments))
+# ticket_info["Comments"] = comments
 
 print(ticket_info)
