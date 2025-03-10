@@ -7,4 +7,10 @@ soup = BeautifulSoup(response.text, 'html.parser')
 
 # extract data test
 title = soup.find("h1").text
-print(title)
+
+# extract Status
+status = soup.find("strong", text="Status:")
+if status:
+    status_val = status.find_next_sibling().text.strip()
+    print(status_val)
+
