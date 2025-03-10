@@ -3,7 +3,7 @@ from bs4 import BeautifulSoup
 import re
 import csv
 
-def init(url="https://issues.apache.org/jira/browse/CAMEL-10597"):
+def init(url):
     response = requests.get(url)
     if response.status_code != 200:
         print("Failed to fetch page")
@@ -69,4 +69,13 @@ def write_to_csv(ticket_info):
         writer.writerow(ticket_info.values())
 
 if __name__ == "__main__":
-    init()
+    import getopt, sys
+    try:
+        opts, args = getopt.getopt(sys.argv[1:], "u:", ["url"])
+    except getopt.GetoptError as err:
+        print(err)
+    url = "https://issues.apache.org/jira/browse/CAMEL-10597"
+    for opt, arg in opts:
+        if opt in ("-u", "--url"):
+            url = arg
+    init(url)
