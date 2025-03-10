@@ -1,6 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
 import re
+import csv
 
 url = "https://issues.apache.org/jira/browse/CAMEL-10597"
 response = requests.get(url)
@@ -55,3 +56,9 @@ ticket_info["Description"] = description
 # ticket_info["Comments"] = comments
 
 print(ticket_info)
+
+# save the ticket_info to a .csv file
+with open('ticket_info.csv', 'w') as csv_file:
+    writer = csv.writer(csv_file)
+    writer.writerow(ticket_info.keys())
+    writer.writerow(ticket_info.values())
