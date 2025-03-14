@@ -2,14 +2,21 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import csv
+import comments as cms
 
-def init(url):
+def init(url, comments_flag):
     response = requests.get(url)
     if response.status_code != 200:
         print("Failed to fetch page")
         exit(1)
-    soup = BeautifulSoup(response.text, 'html.parser')
-    write_to_csv(data_crawling(soup))
+    raw_text = response.text
+    soup = BeautifulSoup(raw_text, 'html.parser')
+    ticket_info = data_crawling(soup)
+    if comments_flag:
+        # extract the Comments
+        comments = cms.get_comments(url)
+        ticket_info["Comments"] = comments
+    write_to_csv()
 
 
 def extract_text(soup, label, title=None, id=None):
@@ -46,20 +53,6 @@ def data_crawling(soup):
     description = extract_text(soup, "div", None, "descriptionmodule_heading")
     ticket_info["Description"] = description
 
-    # extract the Comments
-    # comments = {}
-    # pattern = re.compile(r"comment-\d{8}")
-    # ind = "comment-15748543"
-    # comments = soup.find_all("div", id=ind)
-    # comments = soup.find_all("div", class_="activity-comment")
-    # print(comments)
-
-    # comments_list = soup.find_all(id=ind)
-    # for comment in comments_list:
-    #     comments[comment.find("a", class_="user-hover").text] = comment.find("div", class_="action-body").text
-    # print("Comments: " + str(comments))
-    # ticket_info["Comments"] = comments
-
     return ticket_info
 
 def write_to_csv(ticket_info):
@@ -71,11 +64,14 @@ def write_to_csv(ticket_info):
 if __name__ == "__main__":
     import getopt, sys
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "u:", ["url"])
+        opts, args = getopt.getopt(sys.argv[1:], "cu:", ["url, comments"])
     except getopt.GetoptError as err:
         print(err)
     url = "https://issues.apache.org/jira/browse/CAMEL-10597"
+    comments_flag = False
     for opt, arg in opts:
         if opt in ("-u", "--url"):
             url = arg
-    init(url)
+        if opt in ("-c", "--comments"):
+            comments_flag = True
+    init(url, comments_flag)
