@@ -19,21 +19,23 @@ The script supports the following command-line options:
 
 | Option            | Description                                                                 |
 |-------------------|-----------------------------------------------------------------------------|
+| `-h`, `--help`    | Print basic usage information.                                              |
 | `-u`, `--url`     | Change the url of the ticket that the user wants to extract data            |
-
+| `-c`, `--comments`| Crawl Comments Mode: ON                                                     |
+| `-p`, `--chrome_driver_path`| The path to Chrome Driver to start the realtime crawling process  |
 
 ---
 
 ### **Default Settings**
 - **URL**: `https://issues.apache.org/jira/browse/CAMEL-10597`
 
-If you want to change the default settings, use the `-u` option.
+If you want to change the default settings, use the `-u`, `-c`, and `-p` option.
 
 ---
 
 ### **Examples**
 
-1. **Run the script with default JIRA ticket:**
+1. **Run the script with default JIRA ticket with default settings:**
    ```bash
    python tickets_crawler.py
    ```
@@ -41,6 +43,11 @@ If you want to change the default settings, use the `-u` option.
 2. **Run the script with a JIRA ticket URL:**
    ```bash
    python tickets_crawler.py -u "https://issues.apache.org/jira/browse/CAMEL-10598"
+   ```
+
+3. **Run the script with a JIRA ticket URL with Crawl Comments Mode: ON with chrome driver path:**
+   ```bash
+   python tickets_crawler.py -u "https://issues.apache.org/jira/browse/CAMEL-10598" -c -p /usr/local/bin/chromedriver
    ```
 
 ---
@@ -54,6 +61,7 @@ The script generates a report of the ticket: -> into a .csv file.
 - Python 3.x
 - `requests` library (install via `pip install requests`)
 - `bs4` library (install via `pip install bs4`)
+- `selenium` library (install via `pip install selenium`)
 
 ---
 
