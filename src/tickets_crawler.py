@@ -1,10 +1,9 @@
 import requests
 from bs4 import BeautifulSoup
-import re
 import csv
 import comments as cms
 
-def init(url, comments_flag):
+def init(url, comments_flag, chrome_driver_path):
     response = requests.get(url)
     if response.status_code != 200:
         print("Failed to fetch page")
@@ -14,8 +13,8 @@ def init(url, comments_flag):
     ticket_info = data_crawling(soup)
     if comments_flag:
         # extract the Comments
-        comments = cms.get_comments(url)
-        ticket_info["Comments"] = comments
+        comments_list = cms.get_comments(url, chrome_driver_path)
+        ticket_info["Comments"] = comments_list
     write_to_csv()
 
 
@@ -63,15 +62,35 @@ def write_to_csv(ticket_info):
 
 if __name__ == "__main__":
     import getopt, sys
+    def usage():
+        print("Usage:")
+        print("Options:")
+        print("\t-h, --help: Print this help message")
+        print("\t-u, --url: URL of the JIRA ticket")
+        print("\t-c, --comments: Flag to extract comments")
+        print("\t-p, --chrome_driver_path: Path to the Chrome Driver")
+        print('Note:')
+        print('\tThe default value for the URL is "https://issues.apache.org/jira/browse/CAMEL-10597"')
+        print('\tThe default value for the comments flag is False')
+        print('\tThe default value for the Chrome Driver path is "/usr/local/bin/chromedriver", it\'s the default path for macOS, it might be different for other OS')
+        print("Example:")
+        print("\tpython tickets_crawler.py")
+        print("\tpython tickets_crawler.py -u https://issues.apache.org/jira/browse/CAMEL-10597 -c -p /usr/local/bin/chromedriver")
+        sys.exit(0)
     try:
-        opts, args = getopt.getopt(sys.argv[1:], "cu:", ["url, comments"])
+        opts, args = getopt.getopt(sys.argv[1:], "hcu:p:", ["help", "url", "comments", "chrome_driver_path"])
     except getopt.GetoptError as err:
         print(err)
     url = "https://issues.apache.org/jira/browse/CAMEL-10597"
     comments_flag = False
+    chrome_driver_path = "/usr/local/bin/chromedriver"
     for opt, arg in opts:
+        if opt in ("-h", "--help"):
+            usage()
         if opt in ("-u", "--url"):
             url = arg
         if opt in ("-c", "--comments"):
             comments_flag = True
-    init(url, comments_flag)
+        if opt in ("-p", "--chrome_driver_path"):
+            chrome_driver_path = arg
+    init(url, comments_flag, chrome_driver_path)

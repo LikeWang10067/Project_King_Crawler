@@ -4,7 +4,7 @@ from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 import time
 
-def get_comments(url, chrome_driver_path="/usr/local/bin/chromedriver"):
+def get_comments(url, chrome_driver_path):
     chrome_options = Options()
     # run in headless mode (in the background)
     chrome_options.add_argument("--headless")
