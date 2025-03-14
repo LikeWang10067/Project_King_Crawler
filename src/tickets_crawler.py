@@ -15,7 +15,7 @@ def init(url, comments_flag, chrome_driver_path):
         # extract the Comments
         comments_list = cms.get_comments(url, chrome_driver_path)
         ticket_info["Comments"] = comments_list
-    write_to_csv()
+    write_to_csv(ticket_info)
 
 
 def extract_text(soup, label, title=None, id=None):
